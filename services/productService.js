@@ -99,6 +99,7 @@ export function deleteProductsById(id) {
     if (index === -1) { return null;
     }
 
-    const deletedProduct = products[index]; products.splice(index, 1);
+    const deletedProduct = products[index]; 
+    products.splice(index, 1);
     return deletedProduct;
 };

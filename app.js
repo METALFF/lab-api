@@ -1,11 +1,15 @@
 import express from "express";
+import "dotenv/config";
+import { pool } from "./config/db.js";
 import productRoute from "./routes/productRoutes.js";
 import categoryRoute from "./routes/categoryRoutes.js";
 import orderRoute from "./routes/ordersRoute.js";
 import logger from "./middleware/logger.js";
 import requestTime from "./middleware/requestTime.js";
+import { notFound } from "./middleware/notFound.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 
-const PORT = 3000;
+
 const app = express();
 app.use(logger);
 app.use(requestTime);
@@ -46,6 +50,24 @@ app.get("/api", (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-    console.log(`http://localhost:${PORT}`);
-})
+app.use(notFound);
+app.use(errorHandler);
+
+
+const PORT = process.env.PORT || 3000;
+
+async function startServer() {
+  try {
+    await pool.query("SELECT NOW()");
+    console.log("PostgreSQL connected");
+
+    app.listen(PORT, () => {
+      console.log(`http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Database connection failed:", error);
+    process.exit(1);
+  }
+}
+
+startServer();

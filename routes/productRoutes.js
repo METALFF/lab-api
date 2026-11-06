@@ -1,5 +1,6 @@
 import express from "express";
-import checkApiKeys from "../middleware/checkApiKeys.js";
+import { validateCreateProduct } from "../middleware/validateCreateProduct.js";
+import { validateUpdateProduct } from "../middleware/validateUpdateProduct.js";
 import { getProduct,
       getProductById,
       postProducts,
@@ -16,12 +17,12 @@ console.log("Product Router:", req.method, req.originalUrl); next();
 
 router.get("/", getProduct);
 router.get("/:id", getProductById);
-router.post("/", checkApiKeys, postProducts);
+router.post("/", validateCreateProduct, postProducts);
 
 router.put("/api/products", (req, res) => {
   res.status(200).json({ message: "PUT route: full product replacement" });
 });
-router.patch("/:id", patchProductById);
+router.patch("/:id", validateUpdateProduct, patchProductById);
 router.delete("/:id", deleteProductById);
 
 export default router;

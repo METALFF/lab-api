@@ -2,51 +2,68 @@ import {
         findProductById,
         addProduct,
         updatePorductById,
-        deleteProductsById,
-        getAllProducts
+        getAllProducts,
+        deleteProductByIdService
  } from "../services/productService.js";
+import { AppError } from "../errors/AppError.js";
 
-export function getProduct(req, res) {
-  let result = getAllProducts(req.query);
+export async function getProduct(req, res, next) {
+  try {
+    let result = await getAllProducts(req.query);
 
-  if(req.query.category) {
-    result = result.filter(
-      product => product.category === req.query.category
-    );
-  };
-  res.json(result);
+    if(req.query.category) {
+      result = result.filter(
+        product => product.category === req.query.category
+      );
+    };
+    res.json(result);
+  } catch(error) {
+    next(error);
+  }
+ 
 };
 
-export function getProductById (req, res) {
-  const id = Number(req.params.id);
-  const product = findProductById(id);
+export async function getProductById(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    const product = await findProductById(id);
 
-  if(!product) {
-    return res.status(404).json({message: "Нету такого"});
-  };
-  res.json(product);
-};
+    if (!product) {
+      return next(new AppError("Product not found", 404));
+    };
+    res.json(product);
+  } catch(error) {
+    next(error);
+  }
+}
 
-export function postProducts(req, res) {
-    const product = addProduct(req.body) ;
-    products.push(product);
-    res.status(201).json({ message: "POST route: create new product" });
-};
+export async function postProducts(req, res, next) {
+  try {
+    const product = await addProduct(req.body);
+    res.status(201).json(product);
+  } catch(error) {
+    next(error);
+  }
+}
 
-export function patchProductById (req, res) {
-  const id = Number(req.params.id);
-  const product = updatePorductById(id, req.body);
+export async function patchProductById(req, res, next) {
+  try{
+    const id = Number(req.params.id);
+    const product = await updatePorductById(id, req.body);
 
-  if(!product) {
-    return res.status(404).json({ message: "Такого нету" });
-  };
-  res.status(201).json(product);
-};
+    res.json(product);
+  } catch(error) {
+    next(error);
+  }
+}
 
-export function deleteProductById (req, res) {
-  const id = Number(req.params.id);
-  const product = deleteProductsById(id, req.body);
-  products.splice(product, 1);
+export async function deleteProductById(req, res, next) {
+  try{
+    const id = Number(req.params.id);
+    const product = await deleteProductByIdService(id, req.body);
 
-  res.status(200).json({ message: "Удаление завершено" });
-};
+    res.json(product);
+  } catch(error) {
+    next(error);  
+  }
+}
